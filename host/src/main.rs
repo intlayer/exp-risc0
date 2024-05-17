@@ -5,11 +5,27 @@ use methods::{
 };
 use risc0_zkvm::{default_prover, ExecutorEnv};
 
+use chrono::prelude::*;
+use polars::prelude::*;
+
 fn main() {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
+
+    let df: DataFrame = df!(
+        "integer" => &[1, 2, 3],
+        "date" => &[
+                NaiveDate::from_ymd_opt(2025, 1, 1).unwrap().and_hms_opt(0, 0, 0).unwrap(),
+                NaiveDate::from_ymd_opt(2025, 1, 2).unwrap().and_hms_opt(0, 0, 0).unwrap(),
+                NaiveDate::from_ymd_opt(2025, 1, 3).unwrap().and_hms_opt(0, 0, 0).unwrap(),
+        ],
+        "float" => &[4.0, 5.0, 6.0],
+        "string" => &["a", "b", "c"],
+    )
+    .unwrap();
+    println!("{}", df);
 
     // An executor environment describes the configurations for the zkVM
     // including program inputs.
@@ -49,4 +65,8 @@ fn main() {
     receipt
         .verify(HELLO_GUEST_ID)
         .unwrap();
+
+    // Print, notice, after committing to a journal, the private input became public
+    println!("Hello, world! I generated a proof of guest execution! {} is a public output from journal ", _output);
+
 }
